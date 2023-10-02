@@ -39,12 +39,17 @@ class NEODatabase:
         :param neos: A collection of `NearEarthObject`s.
         :param approaches: A collection of `CloseApproach`es.
         """
-        self._neos = neos
+        self._neo_by_designation = {neo.designation: neo for neo in neos}
+        self._neo_by_name = {neo.name: neo for neo in neos}
+
+        for approach in approaches:
+            neo_designation = approach._designation
+            if neo_designation in self._neo_by_designation:
+                approach.neo = self._neo_by_designation[neo_designation]
+                self._neo_by_designation[neo_designation].approaches.append(approach)
+
+        self._neos = list(self._neo_by_designation.values())
         self._approaches = approaches
-
-        # TODO: What additional auxiliary data structures will be useful?
-
-        # TODO: Link together the NEOs and their close approaches.
 
     def get_neo_by_designation(self, designation):
         """Find and return an NEO by its primary designation.
@@ -59,8 +64,7 @@ class NEODatabase:
         :param designation: The primary designation of the NEO to search for.
         :return: The `NearEarthObject` with the desired primary designation, or `None`.
         """
-        # TODO: Fetch an NEO by its primary designation.
-        return None
+        return self._neo_by_designation.get(designation.upper(), None)
 
     def get_neo_by_name(self, name):
         """Find and return an NEO by its name.
@@ -76,8 +80,7 @@ class NEODatabase:
         :param name: The name, as a string, of the NEO to search for.
         :return: The `NearEarthObject` with the desired name, or `None`.
         """
-        # TODO: Fetch an NEO by its name.
-        return None
+        return self._neo_by_name.get(name.capitalize(), None)
 
     def query(self, filters=()):
         """Query close approaches to generate those that match a collection of filters.
@@ -93,6 +96,10 @@ class NEODatabase:
         :param filters: A collection of filters capturing user-specified criteria.
         :return: A stream of matching `CloseApproach` objects.
         """
-        # TODO: Generate `CloseApproach` objects that match all of the filters.
-        for approach in self._approaches:
-            yield approach
+        if filters:
+            for approach in self._approaches:
+                if all(map(lambda f: f(approach), filters)):
+                    yield approach
+        else:
+            for approach in self._approaches:
+                yield approach
