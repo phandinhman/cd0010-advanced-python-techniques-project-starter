@@ -32,6 +32,7 @@ class NearEarthObject:
     initialized to an empty collection, but eventually populated in the
     `NEODatabase` constructor.
     """
+
     def __init__(self, **info):
         """Create a new `NearEarthObject`.
 
@@ -64,6 +65,7 @@ class NearEarthObject:
                f"diameter={self.diameter:.3f}, hazardous={self.hazardous!r})"
 
     def is_hazardous(self):
+        """Return is hazardous or not."""
         if self.hazardous:
             return 'is'
         
@@ -97,7 +99,6 @@ class CloseApproach:
 
         :param info: A dictionary of excess keyword arguments supplied to the constructor.
         """
-
         self._designation = info.get('designation')
         try:
             self.time = cd_to_datetime(info.get('time'))
